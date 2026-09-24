@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('partials/head', { title: 'Your Results - BMI Check' }) %>
+<body class="min-h-screen bg-slate-950 text-slate-200 px-4 py-6">
+  <div class="pointer-events-none fixed inset-0 bg-[radial-gradient(60rem_40rem_at_50%_-10%,rgba(16,185,129,0.12),transparent)]"></div>
+
+  <div class="relative">
+    <%- include('partials/nav') %>
+
+    <main class="w-full max-w-3xl mx-auto space-y-5">
+
+      <section class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm text-slate-400">
+        <span class="font-bold text-slate-200 tabular-nums"><%= values.actualWeightKg %> kg</span>
+        <span class="text-slate-600">&rarr;</span>
+        <span class="font-bold text-emerald-400 tabular-nums"><%= values.desiredWeightKg %> kg</span>
+        <span class="text-slate-700">&bull;</span>
+        <span class="tabular-nums"><%= values.heightCm %> cm</span>
+        <span class="text-slate-700">&bull;</span>
+        <span>
+          <% if (results.goalType === 'loss') { %>Lose <%= results.weightDeltaKg.toFixed(1) %> kg
+          <% } else if (results.goalType === 'gain') { %>Gain <%= results.weightDeltaKg.toFixed(1) %> kg
+          <% } else { %>Maintain weight<% } %>
+        </span>
+      </section>
+
+      <section class="rounded-3xl bg-slate-900/60 ring-1 ring-white/10 shadow-2xl p-6 sm:p-8">
+        <div class="flex items-baseline justify-between gap-3 mb-1">
+          <h2 class="text-lg font-bold text-white">Your body type</h2>
+          <span class="text-xs text-slate-500">At <%= values.heightCm %> cm</span>
+        </div>
+        <p class="text-sm text-slate-400 mb-6">How your build compares at each weight.</p>
+
+        <div class="grid grid-cols-2 gap-4 sm:gap-8">
+          <% [
+               { fig: figures.current, label: 'Now', weight: values.actualWeightKg,
+                 bmi: results.bmiActual, category: results.bmiActualCategory, accent: 'text-slate-300' },
+               { fig: figures.goal, label: 'At goal', weight: values.desiredWeightKg,
+                 bmi: results.bmiDesired, category: results.bmiDesiredCategory, accent: 'text-emerald-400' }
+             ].forEach((panel) => { %>
+            <div class="rounded-2xl bg-slate-950/50 ring-1 ring-white/5 p-4 flex flex-col items-center">
+              <div class="h-56 sm:h-72 w-full flex items-end justify-center">
+                <div class="h-full aspect-[200/420]">
+                  <%- include('partials/figure', { fig: panel.fig, label: panel.label }) %>
+                </div>
+              </div>
+              <p class="mt-4 text-sm font-bold <%= panel.accent %>"><%= panel.label %></p>
+              <p class="text-xs text-slate-500 tabular-nums mt-0.5"><%= panel.weight %> kg</p>
+              <p class="text-2xl font-extrabold text-white tabular-nums mt-2"><%= panel.bmi.toFixed(1) %></p>
+              <span class="mt-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold <%= CATEGORY_BADGE_CLASSES[panel.category] %>">
+                <%= CATEGORY_LABELS[panel.category] %>
+              </span>
+            </div>
+          <% }) %>
+        </div>
+
+        <div class="relative mt-8">
+          <div class="relative h-6">
+            <div class="absolute bottom-0 -translate-x-1/2 flex flex-col items-center" style="left: <%= bmiScale.currentPct %>%;">
+              <span class="text-[10px] font-bold text-slate-300 whitespace-nowrap">NOW</span>
+              <span class="w-0.5 h-2 bg-slate-300"></span>
+            </div>
+          </div>
+
+          <div class="flex h-3 rounded-full overflow-hidden ring-1 ring-white/10">
+            <% bmiScale.segments.forEach((segment) => { %>
+              <div class="<%= CATEGORY_BAR_CLASSES[segment.category] %>"
+                   style="width: <%= segment.widthPct %>%;"
+                   title="<%= CATEGORY_LABELS[segment.category] %>"></div>
+            <% }) %>
+          </div>
+
+          <div class="relative h-6">
+            <div class="absolute top-0 -translate-x-1/2 flex flex-col items-center" style="left: <%= bmiScale.goalPct %>%;">
+              <span class="w-0.5 h-2 bg-emerald-400"></span>
+              <span class="text-[10px] font-bold text-emerald-400 whitespace-nowrap">GOAL</span>
+            </div>
+          </div>
+
+          <div class="relative h-4 text-[10px] text-slate-600 tabular-nums">
+            <% bmiScale.ticks.forEach((tick, index) => { %>
+              <span class="absolute <%= index === 0 ? '' : (index === bmiScale.ticks.length - 1 ? '-translate-x-full' : '-translate-x-1/2') %>"
+                    style="left: <%= tick.pct %>%;"><%= tick.value %></span>
+            <% }) %>
+          </div>
+        </div>
+
+        <p class="text-[11px] text-slate-600 text-center mt-4">
+          An illustration based on BMI and sex &mdash; body composition varies from person to person.
+        </p>
+      </section>
+
+      <section class="rounded-3xl bg-gradient-to-br from-emerald-500/10 via-slate-900/60 to-slate-900/60 ring-1 ring-emerald-400/20 shadow-2xl p-6 sm:p-8 text-center">
+        <h2 class="text-sm font-bold uppercase tracking-widest text-emerald-400">Daily calorie target</h2>
+
+        <p class="mt-4">
+          <span class="text-6xl font-extrabold text-white tabular-nums"><%= results.recommendedCalories.toLocaleString() %></span>
+          <span class="text-base font-semibold text-slate-400 ml-1.5">kcal</span>
+        </p>
+
+        <p class="text-sm text-slate-400 mt-4 max-w-md mx-auto">
+          <% if (results.goalType === 'loss') { %>
+            About 500 kcal/day below maintenance &mdash; roughly 0.5 kg of loss per week toward <%= values.desiredWeightKg %> kg.
+          <% } else if (results.goalType === 'gain') { %>
+            About 400 kcal/day above maintenance &mdash; a steady gain toward <%= values.desiredWeightKg %> kg.
+          <% } else { %>
+            This matches your maintenance level, keeping you at <%= values.actualWeightKg %> kg.
+          <% } %>
+        </p>
+
+        <% if (results.minApplied) { %>
+          <p class="text-sm text-amber-300 bg-amber-400/10 ring-1 ring-amber-400/30 rounded-xl px-4 py-2.5 mt-5 inline-block">
+            Capped at a safe minimum of <%= results.minKcal %> kcal/day.
+          </p>
+        <% } %>
+
+        <dl class="grid grid-cols-3 gap-3 mt-8 pt-6 border-t border-white/10">
+          <div>
+            <dt class="text-[10px] font-semibold text-slate-500 uppercase tracking-widest">BMR</dt>
+            <dd class="text-xl font-bold text-slate-200 tabular-nums mt-1"><%= Math.round(results.bmr).toLocaleString() %></dd>
+          </div>
+          <div>
+            <dt class="text-[10px] font-semibold text-slate-500 uppercase tracking-widest">Maintenance</dt>
+            <dd class="text-xl font-bold text-slate-200 tabular-nums mt-1"><%= Math.round(results.tdee).toLocaleString() %></dd>
+          </div>
+          <div>
+            <dt class="text-[10px] font-semibold text-slate-500 uppercase tracking-widest">Activity</dt>
+            <dd class="text-xl font-bold text-slate-200 tabular-nums mt-1">&times;<%= results.activityMultiplier %></dd>
+          </div>
+        </dl>
+
+        <p class="text-[11px] text-slate-600 mt-6 max-w-lg mx-auto"><%= DISCLAIMER %></p>
+      </section>
+
+      <% if (projection.goalType !== 'maintain') { %>
+        <section class="rounded-3xl bg-slate-900/60 ring-1 ring-white/10 shadow-2xl p-6 sm:p-8">
+          <h2 class="text-lg font-bold text-white">Realistic timeline</h2>
+          <p class="text-sm text-slate-400 mt-1.5">
+            At a safe pace of <%= projection.safeMin %>&ndash;<%= projection.safeMax %> kg per week.
+          </p>
+
+          <dl class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
+            <div>
+              <dt class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">To <%= projection.goalType === 'loss' ? 'lose' : 'gain' %></dt>
+              <dd class="text-xl font-bold text-slate-200 tabular-nums mt-1"><%= projection.deltaKg %> kg</dd>
+            </div>
+            <div>
+              <dt class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Pace</dt>
+              <dd class="text-xl font-bold text-slate-200 tabular-nums mt-1"><%= projection.rateKgPerWeek %> kg/wk</dd>
+            </div>
+            <div>
+              <dt class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Duration</dt>
+              <dd class="text-xl font-bold text-slate-200 tabular-nums mt-1"><%= projection.weeks %> wks</dd>
+            </div>
+            <div>
+              <dt class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Target date</dt>
+              <dd class="text-xl font-bold text-emerald-400 tabular-nums mt-1"><%= projection.projectedDate %></dd>
+            </div>
+          </dl>
+
+          <% if (currentUser) { %>
+            <form method="POST" action="/goal" class="flex flex-wrap items-end gap-3 mt-7 pt-6 border-t border-white/10">
+              <div>
+                <label for="startDate" class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Start</label>
+                <input type="date" id="startDate" name="startDate" value="<%= projection.startDate %>"
+                  class="rounded-lg bg-slate-950/70 border border-white/10 px-3 py-2 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-400/70" />
+              </div>
+              <div>
+                <label for="targetDate" class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Target</label>
+                <input type="date" id="targetDate" name="targetDate" value="<%= projection.projectedDate %>"
+                  class="rounded-lg bg-slate-950/70 border border-white/10 px-3 py-2 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-400/70" />
+              </div>
+              <button type="submit"
+                class="bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-bold rounded-lg px-5 py-2.5 shadow-lg shadow-emerald-500/20 transition-colors">
+                Save goal dates
+              </button>
+            </form>
+          <% } %>
+
+          <p class="text-[11px] text-slate-600 mt-6 leading-relaxed">
+            Pace follows the CDC's guidance that gradual loss of about 1&ndash;2&nbsp;lb (0.45&ndash;0.9&nbsp;kg) a week
+            is most likely to stay off, and the standard ~7,700&nbsp;kcal per kg energy figure. Treat the date as a
+            plan, not a promise: that static figure overstates long-run loss because metabolism adapts as weight
+            comes off. Re-run this calculator as your weight changes and the target will re-derive from your new numbers.
+          </p>
+        </section>
+      <% } %>
+
+      <div class="flex flex-wrap items-center justify-center gap-3 pt-1">
+        <a href="/" class="text-sm font-semibold text-slate-400 hover:text-white px-4 py-2.5 rounded-xl hover:bg-white/5 transition">
+          &larr; Recalculate
+        </a>
+        <% if (currentUser) { %>
+          <a href="/dashboard" class="text-sm font-bold text-slate-950 bg-emerald-400 hover:bg-emerald-300 px-5 py-2.5 rounded-xl shadow-lg shadow-emerald-500/20 transition">
+            Log today's food
+          </a>
+        <% } else { %>
+          <a href="/signup" class="text-sm font-bold text-slate-950 bg-emerald-400 hover:bg-emerald-300 px-5 py-2.5 rounded-xl shadow-lg shadow-emerald-500/20 transition">
+            Track this target
+          </a>
+        <% } %>
+      </div>
+    </main>
+
+    <%- include('partials/footer') %>
+  </div>
+</body>
+</html>

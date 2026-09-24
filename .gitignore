@@ -1,0 +1,7 @@
+node_modules/
+npm-debug.log
+.env
+bmicheck.db
+bmicheck.db-shm
+bmicheck.db-wal
+outbox

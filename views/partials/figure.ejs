@@ -1,0 +1,97 @@
+<%
+  const L = fig.layout;
+  const P = fig.palette;
+  const W = fig.widths;
+  const H = fig.head;
+  const T = fig.traits;
+  // Hair pulls back and thins as `recede` rises; both sexes grey via T.hair.
+  const hairHalf = L.headRx + 1 - T.recede * 5;
+  const hairBase = H.cy - 6 - T.recede * 7;
+  const hairPeak = H.cy - 30 + T.recede * 5;
+%>
+<svg viewBox="0 0 200 420" class="figure w-full h-full" role="img"
+     aria-label="<%= label %> body illustration">
+  <g class="figure-bob">
+    <!-- legs sit behind the torso so the hips overlap them cleanly -->
+    <g stroke-linecap="round" fill="none">
+      <% [fig.limbs.leftLeg, fig.limbs.rightLeg].forEach((leg) => { %>
+        <path d="<%= leg.thigh %>" stroke="<%= P.skinLine %>" stroke-width="<%= W.thigh * 2 + 3 %>" />
+        <path d="<%= leg.calf %>" stroke="<%= P.skinLine %>" stroke-width="<%= W.calf * 2 + 3 %>" />
+      <% }) %>
+      <% [fig.limbs.leftLeg, fig.limbs.rightLeg].forEach((leg) => { %>
+        <path d="<%= leg.thigh %>" stroke="<%= P.skin %>" stroke-width="<%= W.thigh * 2 %>" />
+        <path d="<%= leg.calf %>" stroke="<%= P.skin %>" stroke-width="<%= W.calf * 2 %>" />
+        <ellipse cx="<%= leg.footX %>" cy="<%= L.footY %>" rx="<%= W.calf * 1.15 %>" ry="7"
+                 fill="<%= P.skinShade %>" stroke="<%= P.skinLine %>" stroke-width="1.5" />
+      <% }) %>
+      <path d="<%= fig.limbs.neck %>" stroke="<%= P.skin %>" stroke-width="<%= W.neck * 2 %>" />
+    </g>
+
+    <g class="figure-breathe">
+      <path d="<%= fig.torso %>" fill="<%= P.skin %>" stroke="<%= P.skinLine %>" stroke-width="1.8" stroke-linejoin="round" />
+
+      <g stroke="<%= P.skinLine %>" stroke-width="1.6" fill="none"
+         stroke-linecap="round" opacity="<%= fig.lean ? 0.55 : 0.4 %>">
+        <% fig.details.forEach((d) => { %><path d="<%= d %>" /><% }) %>
+      </g>
+
+      <% if (fig.bra) { %>
+        <path d="<%= fig.bra %>" fill="<%= fig.outfit.main %>" />
+        <path d="M <%= L.cx - W.chest * 0.55 %> <%= L.chestY - 12 %> L <%= L.cx - W.shoulder * 0.55 %> <%= L.shoulderY + 2 %>"
+              stroke="<%= fig.outfit.main %>" stroke-width="4" fill="none" stroke-linecap="round" />
+        <path d="M <%= L.cx + W.chest * 0.55 %> <%= L.chestY - 12 %> L <%= L.cx + W.shoulder * 0.55 %> <%= L.shoulderY + 2 %>"
+              stroke="<%= fig.outfit.main %>" stroke-width="4" fill="none" stroke-linecap="round" />
+      <% } %>
+    </g>
+
+    <path d="<%= fig.shorts %>" fill="<%= fig.outfit.main %>" stroke="<%= fig.outfit.trim %>" stroke-width="1.5" stroke-linejoin="round" />
+    <path d="M <%= L.cx - W.hip - 1 %> <%= L.waistY + 16 %> L <%= L.cx + W.hip + 1 %> <%= L.waistY + 16 %>"
+          stroke="<%= fig.outfit.trim %>" stroke-width="5" stroke-linecap="round" fill="none" />
+
+    <g stroke-linecap="round" fill="none">
+      <% [['left', fig.limbs.leftArm], ['right', fig.limbs.rightArm]].forEach(([side, a]) => { %>
+        <g class="figure-arm-<%= side %>">
+          <path d="<%= a.upper %>" stroke="<%= P.skinLine %>" stroke-width="<%= W.upperArm * 2 + 3 %>" />
+          <path d="<%= a.fore %>" stroke="<%= P.skinLine %>" stroke-width="<%= W.forearm * 2 + 3 %>" />
+          <path d="<%= a.upper %>" stroke="<%= P.skin %>" stroke-width="<%= W.upperArm * 2 %>" />
+          <path d="<%= a.fore %>" stroke="<%= P.skin %>" stroke-width="<%= W.forearm * 2 %>" />
+          <circle cx="<%= a.wrist.x %>" cy="<%= a.wrist.y %>"
+                  r="<%= W.forearm * 1.15 %>" fill="<%= P.skin %>" stroke="<%= P.skinLine %>" stroke-width="1.5" />
+        </g>
+      <% }) %>
+    </g>
+
+    <g class="figure-head">
+      <ellipse cx="<%= H.cx %>" cy="<%= H.cy %>" rx="<%= H.rx %>" ry="<%= H.ry %>"
+               fill="<%= P.skin %>" stroke="<%= P.skinLine %>" stroke-width="1.8" />
+
+      <% if (fig.female) { %>
+        <path d="M <%= H.cx - hairHalf %> <%= H.cy - 2 %>
+                 C <%= H.cx - hairHalf %> <%= hairPeak - 4 %> <%= H.cx + hairHalf %> <%= hairPeak - 4 %> <%= H.cx + hairHalf %> <%= H.cy - 2 %>
+                 C <%= H.cx + hairHalf - 4 %> <%= H.cy - 18 %> <%= H.cx - hairHalf + 4 %> <%= H.cy - 18 %> <%= H.cx - hairHalf %> <%= H.cy - 2 %> Z"
+              fill="<%= T.hair %>" />
+        <circle cx="<%= H.cx %>" cy="<%= H.cy - 28 %>" r="<%= 9 - T.recede * 2 %>" fill="<%= T.hair %>" />
+      <% } else { %>
+        <path d="M <%= H.cx - hairHalf %> <%= hairBase %>
+                 C <%= H.cx - hairHalf %> <%= hairPeak %> <%= H.cx + hairHalf %> <%= hairPeak %> <%= H.cx + hairHalf %> <%= hairBase %>
+                 C <%= H.cx + hairHalf - 3 %> <%= hairBase - 11 %> <%= H.cx - hairHalf + 3 %> <%= hairBase - 11 %> <%= H.cx - hairHalf %> <%= hairBase %> Z"
+              fill="<%= T.hair %>" />
+      <% } %>
+
+      <ellipse cx="<%= H.cx - 7 %>" cy="<%= H.cy + 1 %>" rx="1.9" ry="2.4" fill="<%= P.ink %>" />
+      <ellipse cx="<%= H.cx + 7 %>" cy="<%= H.cy + 1 %>" rx="1.9" ry="2.4" fill="<%= P.ink %>" />
+      <path d="M <%= H.cx - 4.5 %> <%= H.cy + 11 %> Q <%= H.cx %> <%= H.cy + 14.5 %> <%= H.cx + 4.5 %> <%= H.cy + 11 %>"
+            stroke="<%= P.ink %>" stroke-width="1.4" fill="none" stroke-linecap="round" />
+
+      <% if (T.lines > 0.15) { %>
+        <g stroke="<%= P.skinLine %>" stroke-width="1.25" fill="none" stroke-linecap="round"
+           opacity="<%= (T.lines * 0.9).toFixed(2) %>">
+          <path d="M <%= H.cx - 12.5 %> <%= H.cy - 1 %> l -2.5 -1.5" />
+          <path d="M <%= H.cx + 12.5 %> <%= H.cy - 1 %> l 2.5 -1.5" />
+          <path d="M <%= H.cx - 7 %> <%= H.cy + 6 %> Q <%= H.cx - 9 %> <%= H.cy + 10 %> <%= H.cx - 5.5 %> <%= H.cy + 12 %>" />
+          <path d="M <%= H.cx + 7 %> <%= H.cy + 6 %> Q <%= H.cx + 9 %> <%= H.cy + 10 %> <%= H.cx + 5.5 %> <%= H.cy + 12 %>" />
+        </g>
+      <% } %>
+    </g>
+  </g>
+</svg>

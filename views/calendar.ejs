@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('partials/head', { title: 'Calendar - BMI Check' }) %>
+<body class="min-h-screen bg-slate-950 text-slate-200 px-4 py-6">
+  <div class="pointer-events-none fixed inset-0 bg-[radial-gradient(60rem_40rem_at_50%_-10%,rgba(16,185,129,0.1),transparent)]"></div>
+
+  <div class="relative">
+    <%- include('partials/nav') %>
+
+    <main class="w-full max-w-3xl mx-auto space-y-5">
+
+      <% if (goal && goal.progress) { %>
+        <section class="rounded-3xl bg-slate-900/60 ring-1 ring-white/10 shadow-2xl p-6 sm:p-7">
+          <div class="flex flex-wrap items-baseline justify-between gap-2 mb-4">
+            <h2 class="text-base font-bold text-white">Goal window</h2>
+            <span class="text-xs text-slate-500 tabular-nums"><%= goal.startDate %> &rarr; <%= goal.targetDate %></span>
+          </div>
+          <div class="h-2.5 rounded-full bg-white/5 ring-1 ring-white/10 overflow-hidden">
+            <div class="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-300"
+                 style="width: <%= goal.progress.percent %>%;"></div>
+          </div>
+          <p class="text-xs text-slate-500 mt-2">
+            <% if (goal.progress.overdue) { %>
+              Target date passed <%= Math.abs(goal.progress.remainingDays) %> days ago.
+            <% } else { %>
+              Day <%= goal.progress.elapsedDays %> of <%= goal.progress.totalDays %> &mdash;
+              <span class="text-emerald-400 font-semibold"><%= goal.progress.remainingDays %> days left</span>
+            <% } %>
+          </p>
+        </section>
+      <% } %>
+
+      <section class="rounded-3xl bg-slate-900/60 ring-1 ring-white/10 shadow-2xl p-5 sm:p-7">
+        <div class="flex items-center justify-between gap-3 mb-6">
+          <a href="/calendar?month=<%= calendar.prevMonth %>" aria-label="Previous month"
+             class="w-9 h-9 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 transition">&larr;</a>
+          <h1 class="text-lg font-bold text-white"><%= calendar.label %></h1>
+          <a href="/calendar?month=<%= calendar.nextMonth %>" aria-label="Next month"
+             class="w-9 h-9 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 transition">&rarr;</a>
+        </div>
+
+        <div class="grid grid-cols-7 gap-1 sm:gap-1.5 mb-2">
+          <% calendar.weekdayLabels.forEach((day) => { %>
+            <div class="text-center text-[10px] font-bold uppercase tracking-widest text-slate-600"><%= day %></div>
+          <% }) %>
+        </div>
+
+        <div class="grid grid-cols-7 gap-1 sm:gap-1.5">
+          <% calendar.weeks.forEach((week) => { %>
+            <% week.forEach((cell) => { %>
+              <% if (!cell) { %>
+                <div></div>
+              <% } else { %>
+                <a href="/dashboard?date=<%= cell.date %>"
+                   class="relative aspect-square rounded-lg sm:rounded-xl flex flex-col items-center justify-center transition
+                          <%= cell.status === 'over' ? 'bg-red-400/15 ring-1 ring-red-400/40 hover:bg-red-400/25'
+                            : cell.status === 'under' ? 'bg-emerald-400/15 ring-1 ring-emerald-400/40 hover:bg-emerald-400/25'
+                            : cell.status === 'logged' ? 'bg-slate-400/15 ring-1 ring-slate-400/30 hover:bg-slate-400/25'
+                            : 'bg-white/[0.03] ring-1 ring-white/5 hover:bg-white/[0.07]' %>
+                          <%= cell.isFuture ? 'opacity-40' : '' %>
+                          <%= cell.isToday ? 'outline outline-2 outline-offset-1 outline-emerald-400' : '' %>">
+                  <span class="text-xs font-semibold tabular-nums
+                               <%= cell.status === 'empty' ? 'text-slate-600' : 'text-slate-100' %>"><%= cell.day %></span>
+                  <% if (cell.total) { %>
+                    <span class="text-[9px] sm:text-[10px] tabular-nums
+                                 <%= cell.status === 'over' ? 'text-red-300' : 'text-emerald-300' %>"><%= cell.total.toLocaleString() %></span>
+                  <% } %>
+                </a>
+              <% } %>
+            <% }) %>
+          <% }) %>
+        </div>
+
+        <dl class="grid grid-cols-3 gap-3 mt-7 pt-5 border-t border-white/10 text-center">
+          <div>
+            <dt class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Days logged</dt>
+            <dd class="text-xl font-bold text-slate-200 tabular-nums mt-1"><%= calendar.loggedDays %> / <%= calendar.daysInMonth %></dd>
+          </div>
+          <div>
+            <dt class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Avg / logged day</dt>
+            <dd class="text-xl font-bold text-slate-200 tabular-nums mt-1"><%= calendar.averagePerLoggedDay.toLocaleString() %></dd>
+          </div>
+          <div>
+            <dt class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">On target</dt>
+            <dd class="text-xl font-bold tabular-nums mt-1 <%= calendar.daysOnTarget === null ? 'text-slate-600' : 'text-emerald-400' %>">
+              <%= calendar.daysOnTarget === null ? '--' : calendar.daysOnTarget %>
+            </dd>
+          </div>
+        </dl>
+
+        <div class="flex flex-wrap items-center justify-center gap-4 mt-5 text-[11px] text-slate-500">
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-emerald-400/40"></span> At or under target</span>
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-red-400/40"></span> Over target</span>
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-white/10"></span> Nothing logged</span>
+        </div>
+      </section>
+
+      <div class="text-center">
+        <a href="/dashboard" class="text-sm font-semibold text-slate-400 hover:text-white px-4 py-2.5 rounded-xl hover:bg-white/5 transition">
+          &larr; Back to tracker
+        </a>
+      </div>
+    </main>
+
+    <%- include('partials/footer') %>
+  </div>
+</body>
+</html>

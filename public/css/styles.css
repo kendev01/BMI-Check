@@ -1,0 +1,114 @@
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Spinner arrows collide with the unit suffix shown inside each number input. */
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+/* Dark theme needs the native date picker icon inverted to stay visible. */
+input[type='date']::-webkit-calendar-picker-indicator {
+  filter: invert(0.7);
+  cursor: pointer;
+}
+
+/* ---- Idle animation for the illustrated figures ----
+   Transform origins are in the SVG's own viewBox units, which is why they are
+   expressed as raw numbers rather than percentages. */
+.figure {
+  overflow: visible;
+}
+
+.figure-bob {
+  animation: fig-bob 3.6s ease-in-out infinite;
+}
+
+.figure-breathe {
+  transform-origin: 100px 220px;
+  animation: fig-breathe 3.6s ease-in-out infinite;
+}
+
+.figure-head {
+  transform-origin: 100px 70px;
+  animation: fig-head 7.2s ease-in-out infinite;
+}
+
+.figure-arm-left {
+  transform-origin: 100px 92px;
+  animation: fig-arm-left 4.8s ease-in-out infinite;
+}
+
+.figure-arm-right {
+  transform-origin: 100px 92px;
+  animation: fig-arm-right 4.8s ease-in-out infinite;
+}
+
+@keyframes fig-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes fig-breathe {
+  0%,
+  100% {
+    transform: scale(1, 1);
+  }
+  50% {
+    transform: scale(1.018, 1.012);
+  }
+}
+
+@keyframes fig-head {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  30% {
+    transform: rotate(1.6deg);
+  }
+  70% {
+    transform: rotate(-1.6deg);
+  }
+}
+
+@keyframes fig-arm-left {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(1.8deg);
+  }
+}
+
+@keyframes fig-arm-right {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-1.8deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .figure-bob,
+  .figure-breathe,
+  .figure-head,
+  .figure-arm-left,
+  .figure-arm-right {
+    animation: none;
+  }
+}

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('partials/head', { title: 'BMI Check' }) %>
+<body class="min-h-screen bg-slate-950 text-slate-200 px-4 py-6">
+  <div class="pointer-events-none fixed inset-0 bg-[radial-gradient(60rem_40rem_at_50%_-10%,rgba(16,185,129,0.12),transparent)]"></div>
+
+  <div class="relative">
+    <%- include('partials/nav') %>
+
+    <main class="w-full max-w-xl mx-auto">
+      <%- include('partials/header') %>
+
+      <form method="POST" action="/calculate" novalidate
+            class="rounded-3xl bg-slate-900/60 ring-1 ring-white/10 shadow-2xl p-6 sm:p-8 space-y-7">
+
+        <fieldset>
+          <legend class="text-xs font-bold uppercase tracking-widest text-emerald-400 mb-4">Your body</legend>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="heightCm" class="block text-sm font-medium text-slate-300 mb-1.5">Height</label>
+              <div class="relative">
+                <input type="number" id="heightCm" name="heightCm" min="100" max="250" step="0.1" required
+                  placeholder="170" value="<%= values.heightCm || '' %>"
+                  class="w-full rounded-xl bg-slate-950/70 border border-white/10 px-4 py-3 pr-12 text-slate-100 tabular-nums placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-400/70 focus:border-emerald-400/50 transition" />
+                <span class="absolute inset-y-0 right-3.5 flex items-center text-sm text-slate-500 pointer-events-none">cm</span>
+              </div>
+              <p data-error-for="heightCm" class="text-xs text-red-400 mt-1.5 <%= errors.heightCm ? '' : 'hidden' %>"><%= errors.heightCm || '' %></p>
+            </div>
+
+            <div>
+              <label for="age" class="block text-sm font-medium text-slate-300 mb-1.5">Age</label>
+              <div class="relative">
+                <input type="number" id="age" name="age" min="15" max="100" step="1" required
+                  placeholder="30" value="<%= values.age || '' %>"
+                  class="w-full rounded-xl bg-slate-950/70 border border-white/10 px-4 py-3 pr-12 text-slate-100 tabular-nums placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-400/70 focus:border-emerald-400/50 transition" />
+                <span class="absolute inset-y-0 right-3.5 flex items-center text-sm text-slate-500 pointer-events-none">yrs</span>
+              </div>
+              <p data-error-for="age" class="text-xs text-red-400 mt-1.5 <%= errors.age ? '' : 'hidden' %>"><%= errors.age || '' %></p>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend class="text-xs font-bold uppercase tracking-widest text-emerald-400 mb-4">Weight</legend>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="actualWeightKg" class="block text-sm font-medium text-slate-300 mb-1.5">Right now</label>
+              <div class="relative">
+                <input type="number" id="actualWeightKg" name="actualWeightKg" min="30" max="300" step="0.1" required
+                  placeholder="90" value="<%= values.actualWeightKg || '' %>"
+                  class="w-full rounded-xl bg-slate-950/70 border border-white/10 px-4 py-3 pr-12 text-slate-100 tabular-nums placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-400/70 focus:border-emerald-400/50 transition" />
+                <span class="absolute inset-y-0 right-3.5 flex items-center text-sm text-slate-500 pointer-events-none">kg</span>
+              </div>
+              <p data-error-for="actualWeightKg" class="text-xs text-red-400 mt-1.5 <%= errors.actualWeightKg ? '' : 'hidden' %>"><%= errors.actualWeightKg || '' %></p>
+            </div>
+
+            <div>
+              <label for="desiredWeightKg" class="block text-sm font-medium text-slate-300 mb-1.5">Goal</label>
+              <div class="relative">
+                <input type="number" id="desiredWeightKg" name="desiredWeightKg" min="30" max="300" step="0.1" required
+                  placeholder="70" value="<%= values.desiredWeightKg || '' %>"
+                  class="w-full rounded-xl bg-slate-950/70 border border-white/10 px-4 py-3 pr-12 text-slate-100 tabular-nums placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-400/70 focus:border-emerald-400/50 transition" />
+                <span class="absolute inset-y-0 right-3.5 flex items-center text-sm text-slate-500 pointer-events-none">kg</span>
+              </div>
+              <p data-error-for="desiredWeightKg" class="text-xs text-red-400 mt-1.5 <%= errors.desiredWeightKg ? '' : 'hidden' %>"><%= errors.desiredWeightKg || '' %></p>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend class="text-xs font-bold uppercase tracking-widest text-emerald-400 mb-4">For your calorie target</legend>
+
+          <label class="block text-sm font-medium text-slate-300 mb-2">Sex</label>
+          <div class="grid grid-cols-2 gap-3">
+            <% ['male', 'female'].forEach((option) => { %>
+              <label class="cursor-pointer">
+                <input type="radio" name="sex" value="<%= option %>" class="peer sr-only"
+                  <%= values.sex === option ? 'checked' : '' %> />
+                <span class="block text-center text-sm px-4 py-3 rounded-xl border border-white/10 bg-slate-950/50 text-slate-400 transition hover:border-white/20 peer-checked:border-emerald-400 peer-checked:bg-emerald-400/10 peer-checked:text-emerald-300 peer-checked:font-semibold">
+                  <%= option.charAt(0).toUpperCase() + option.slice(1) %>
+                </span>
+              </label>
+            <% }) %>
+          </div>
+          <p data-error-for="sex" class="text-xs text-red-400 mt-1.5 <%= errors.sex ? '' : 'hidden' %>"><%= errors.sex || '' %></p>
+
+          <label for="activityLevel" class="block text-sm font-medium text-slate-300 mt-5 mb-2">Activity level</label>
+          <select id="activityLevel" name="activityLevel" required
+            class="w-full rounded-xl bg-slate-950/70 border border-white/10 px-4 py-3 text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400/70 focus:border-emerald-400/50 transition">
+            <option value="" disabled <%= !values.activityLevel ? 'selected' : '' %>>Select your activity level</option>
+            <% Object.entries(activityOptions).forEach(([key, option]) => { %>
+              <option value="<%= key %>" <%= values.activityLevel === key ? 'selected' : '' %>><%= option.label %></option>
+            <% }) %>
+          </select>
+          <p data-error-for="activityLevel" class="text-xs text-red-400 mt-1.5 <%= errors.activityLevel ? '' : 'hidden' %>"><%= errors.activityLevel || '' %></p>
+        </fieldset>
+
+        <button type="submit"
+          class="w-full bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-bold rounded-xl px-4 py-4 shadow-lg shadow-emerald-500/20 transition-colors">
+          See my results
+        </button>
+      </form>
+
+      <% if (!currentUser) { %>
+        <p class="text-center text-sm text-slate-500 mt-6">
+          <a href="/signup" class="text-emerald-400 hover:text-emerald-300 font-semibold">Create an account</a>
+          to log your daily calories against the target.
+        </p>
+      <% } %>
+    </main>
+
+    <%- include('partials/footer') %>
+  </div>
+  <script src="/js/formValidation.js"></script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('partials/head', { title: 'Choose a new password - BMI Check' }) %>
+<body class="min-h-screen bg-slate-950 text-slate-200 px-4 py-6">
+  <div class="pointer-events-none fixed inset-0 bg-[radial-gradient(60rem_40rem_at_50%_-10%,rgba(16,185,129,0.12),transparent)]"></div>
+
+  <div class="relative">
+    <%- include('partials/nav') %>
+
+    <main class="w-full max-w-md mx-auto">
+      <div class="rounded-3xl bg-slate-900/60 ring-1 ring-white/10 shadow-2xl p-7 sm:p-9">
+        <% if (!valid) { %>
+          <div class="text-center">
+            <span class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-red-400/15 text-red-400 text-2xl">&#9888;</span>
+            <h1 class="text-2xl font-extrabold tracking-tight text-white mt-4">This link has expired</h1>
+            <p class="text-sm text-slate-400 mt-3">
+              Reset links last one hour and can only be used once. Request a fresh one to continue.
+            </p>
+            <a href="/forgot"
+               class="inline-block mt-7 bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-bold rounded-xl px-5 py-3 transition-colors">
+              Send a new link
+            </a>
+          </div>
+        <% } else { %>
+          <h1 class="text-2xl font-extrabold tracking-tight text-white">Choose a new password</h1>
+          <p class="text-sm text-slate-400 mt-1.5">You'll be signed in straight away.</p>
+
+          <form method="POST" action="/reset/<%= token %>" novalidate class="mt-7 space-y-5">
+            <div>
+              <label for="password" class="block text-sm font-medium text-slate-300 mb-1.5">New password</label>
+              <input type="password" id="password" name="password" required autocomplete="new-password"
+                placeholder="At least 8 characters"
+                class="w-full rounded-xl bg-slate-950/70 border border-white/10 px-4 py-3 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-400/70 focus:border-emerald-400/50 transition" />
+              <% if (errors.password) { %><p class="text-xs text-red-400 mt-1.5"><%= errors.password %></p><% } %>
+            </div>
+
+            <div>
+              <label for="confirm" class="block text-sm font-medium text-slate-300 mb-1.5">Confirm password</label>
+              <input type="password" id="confirm" name="confirm" required autocomplete="new-password"
+                placeholder="Type it again"
+                class="w-full rounded-xl bg-slate-950/70 border border-white/10 px-4 py-3 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-400/70 focus:border-emerald-400/50 transition" />
+              <% if (errors.confirm) { %><p class="text-xs text-red-400 mt-1.5"><%= errors.confirm %></p><% } %>
+            </div>
+
+            <button type="submit"
+              class="w-full bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-bold rounded-xl px-4 py-3.5 shadow-lg shadow-emerald-500/20 transition-colors">
+              Save new password
+            </button>
+          </form>
+        <% } %>
+      </div>
+    </main>
+
+    <%- include('partials/footer') %>
+  </div>
+  <script src="/js/passwordToggle.js"></script>
+</body>
+</html>
